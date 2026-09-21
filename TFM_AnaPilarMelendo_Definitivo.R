@@ -572,25 +572,39 @@ for (i in 1:total_genes) {
       v_linaje   <- if (length(v_linaje) > 0 && !is.na(v_linaje)) v_linaje else 0 
       v_residual <- if (length(v_residual) > 0 && !is.na(v_residual)) v_residual else 0
       
-      tabla_anova <- as.data.frame(anova(model_mix, type = 2)) #Cálculo ANOVA II
-      #Se escalan las sumas de cuadrados por muestra (varianzas comparables)
-      v_meth   <- tabla_anova["metilacion", "Sum Sq"] / n_muestras
-      v_growth <- tabla_anova["as.factor(GrowthPattern)", "Sum Sq"] / n_muestras
-      v_msi    <- tabla_anova["MSIScore", "Sum Sq"] / n_muestras
-      v_pc1    <- tabla_anova["PC1", "Sum Sq"] / n_muestras
-      v_pc2    <- tabla_anova["PC2", "Sum Sq"] / n_muestras
+      fijos_nombres <- names(lme4::fixef(model_mix))[-1] # Excluye el Intercepto
+      v_fijos_lista <- numeric(length(fijos_nombres))
+      names(v_fijos_lista) <- fijos_nombres
       
+      for(fijo in fijos_nombres) {
+        # Se calcula la varianza explicada por cada variable fija por separado
+        v_fijos_lista[fijo] <- var(as.vector(lme4::getME(model_mix, "X")[, fijo] * lme4::fixef(model_mix)[fijo]))
+      }
+      
+      v_meth   <- sum(v_fijos_lista[grepl("metilacion", names(v_fijos_lista))])
+      v_growth <- sum(v_fijos_lista[grepl("GrowthPattern", names(v_fijos_lista))])
+      v_msi    <- sum(v_fijos_lista[grepl("MSIScore", names(v_fijos_lista))])
+      v_pc1    <- sum(v_fijos_lista[grepl("PC1", names(v_fijos_lista))])
+      v_pc2    <- sum(v_fijos_lista[grepl("PC2", names(v_fijos_lista))])
+      
+      # Control de valores nulos o ausentes
+      v_meth   <- if(is.na(v_meth)) 0 else v_meth
+      v_growth <- if(is.na(v_growth)) 0 else v_growth
+      v_msi    <- if(is.na(v_msi)) 0 else v_msi
+      v_pc1    <- if(is.na(v_pc1)) 0 else v_pc1
+      v_pc2    <- if(is.na(v_pc2)) 0 else v_pc2
+      
+      # Suma total (Efectos Fijos + Efecto Aleatorio + Varianza Residual)
       v_total_real <- v_meth + v_growth + v_msi + v_pc1 + v_pc2 + v_linaje + v_residual
       
-      
-      # Cálculo de porcentajes 
+      # Cálculo de la contribución porcentual
       if (v_total_real > 0) {
         pct_meth   <- (v_meth / v_total_real) * 100
         pct_growth <- (v_growth / v_total_real) * 100
         pct_msi    <- (v_msi / v_total_real) * 100
         pct_pc1    <- (v_pc1 / v_total_real) * 100
         pct_pc2    <- (v_pc2 / v_total_real) * 100
-      } else {pct_meth <- 0; pct_growth <- 0; pct_msi <- 0; pct_pc1 <- 0; pct_pc2 <- 0}
+      } else { pct_meth <- 0; pct_growth <- 0; pct_msi <- 0; pct_pc1 <- 0; pct_pc2 <- 0 }
       
       # Se extraen los resultados
       if(nrow(coefs) > 0) {
@@ -652,8 +666,8 @@ combinaciones_reales_fdr <- tabla_modelos %>% filter(Gene %in% genes_silenciados
 cat("Combinaciones tras FDR:", combinaciones_reales_fdr, "\n")  
 
 
-# 7.4. Resumen de la varianza (ANOVA TIPO II) 
-#----------------------------------------------
+# 7.4. Resumen de la varianza 
+#-----------------------------
 
 resumen_varianza <- mmm_final %>%
   dplyr::select(Gene, starts_with("Pct_Var_Real_")) %>%
@@ -1238,9 +1252,9 @@ farma_final <- farma1_filtrado_viabilidad %>%
 #12.3. Reporte
 #--------------
 
-cat("Fármacos iniciales:", length(unique(farma1$IDs)), "\n") #6790
-cat("Fármacos tras cribado:", length(unique(farma1_filtrado_viabilidad$IDs)), "\n") #6790
-cat("Fármacos finales tras el cribado:", length(unique(farma_final$IDs)), "\n") #6195
+cat("Fármacos iniciales:", length(unique(farma1$IDs)), "\n")
+cat("Fármacos tras cribado:", length(unique(farma1_filtrado_viabilidad$IDs)), "\n") 
+cat("Fármacos finales tras el cribado:", length(unique(farma_final$IDs)), "\n")
 
 
 #===================================================
