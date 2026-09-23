@@ -875,8 +875,8 @@ set.seed(42)
 ids_univ_totales <- bitr(genes_universales, fromType = "SYMBOL", toType = "ENTREZID", OrgDb = org.Hs.eg.db)
 
 
-# 10.1. Visualización de los procesos Gene Ontology en español
-#---------------------------------------------------------------
+# 10.1. Visualización de los procesos Gene Ontology
+#----------------------------------------------------
 
 # Análisis GO
 set.seed(42)
@@ -969,8 +969,8 @@ if(!is.null(go_univ_esp) && nrow(as.data.frame(go_univ_esp)) > 0) {
 } else {cat("No se puede realizar porque el objeto GO está vacío.\n")}
 
 
-# 10.3. Visualización de rutas metabólicas (KEGG) en español
-#------------------------------------------------------------
+# 10.3. Visualización de rutas metabólicas (KEGG) 
+#--------------------------------------------------
 
 #Análisis de las rutas KEGG
 set.seed(42)
@@ -1068,8 +1068,8 @@ genes_clasificados_entrez <- genes_clasificados %>%
   inner_join(ids_espe_comparativo, by = c("Gene" = "SYMBOL"))
 
 
-# 11.1. Visualización comparativa de los procesos Gene Ontology en español
-#--------------------------------------------------------------------------
+# 11.1. Visualización comparativa de los procesos Gene Ontology
+#----------------------------------------------------------------
 
 # Análisis comparativo GO por estadio
 set.seed(42)
@@ -1159,8 +1159,8 @@ if(!is.null(go_comparativo) && nrow(as.data.frame(go_comparativo)) > 0) {
 } else {cat("No se encontraron términos significativos en el análisis de compareCluster.\n")}
 
 
-# 11.2. Visualización comparativa de los procesos Gene Ontology en español
-#--------------------------------------------------------------------------
+# 11.2. Visualización de rutas metabólicas (KEGG)
+#-------------------------------------------------
 
 # Análisis comparativo de las rutas KEGG
 set.seed(42)
@@ -1257,9 +1257,9 @@ cat("Fármacos tras cribado:", length(unique(farma1_filtrado_viabilidad$IDs)), "
 cat("Fármacos finales tras el cribado:", length(unique(farma_final$IDs)), "\n")
 
 
-#===================================================
-# FASE 13: Modelo lineal multivariante regularizado
-#===================================================
+#======================================================
+# FASE 13: Identificacion de asociaciones gen-farmaco
+#======================================================
 
 # 13.1. Configuración del cluster multinúcleo
 #----------------------------------------------
